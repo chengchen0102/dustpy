@@ -512,6 +512,16 @@ def _f_impl_1_direct(x0, Y0, dx, *args, **kwargs):
             K1 = - (boundary.inner._r[0]/boundary.inner._r[1])**p
             jac[0, 1] = -K1/dx
             rhs[0] = 0.
+        elif boundary.inner.condition == "non_zero_torque":
+            x1 = boundary.inner._r[1]**0.5
+            x2 = boundary.inner._r[2]**0.5
+            xi = boundary.inner._ri[1]**0.5
+            K1 = boundary.inner.value*xi*boundary.inner._r[1]**(1.5)/(x2-x1)/boundary.inner._r[0]**(1.5)
+            K2 = boundary.inner.value*xi*boundary.inner._r[2]**(1.5)/(x2-x1)/boundary.inner._r[0]**(1.5)
+            jac[0, 1] = -K1/dx
+            jac[0, 2] = K2/dx
+            rhs[0] = 0.
+
 
     # Outer boundary
     if boundary.outer is not None:
