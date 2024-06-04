@@ -58,6 +58,8 @@ class Boundary(object):
             text = "Gradient"
         elif self._condition == "pow":
             text = "Power law with set exponent"
+        elif self._condition == "non_zero_torque":
+            text = "Non zero torque with f"
         ret = "{}".format(text)
         return ret
 
@@ -95,10 +97,12 @@ class Boundary(object):
                 - "grad" : custom gradient
                 - "pow" : custom power law with set exponent
                 - None : Don't impose boundary condition (default)
+                - "non_zero_torque" : custom f (Nixon and Pringle 2021)
+
         value : float or array, optional, default : None
-            Value if needed for boundary condition"""
-        if condition in [None, "const_val", "const_pow", "const_grad", "grad", "val", "pow"]:
-            if condition in ["val", "grad", "pow"] and value is None:
+        Value if needed for boundary condition"""
+        if condition in [None, "const_val", "const_pow", "const_grad", "grad", "val", "pow", "non_zero_torque",]:
+            if condition in ["val", "grad", "pow", "non_zero_torque"] and value is None:
                 msg = "You have to give a value for condition '{:}'.".format(
                     condition)
                 raise ValueError(msg)
@@ -135,6 +139,13 @@ class Boundary(object):
             return r[1]/r[0]*S[1] - self._value*ri[1]/r[0]*(r[1]-r[0])
         elif self._condition == "val":
             return self._value
+        elif self._condition == "non_zero_torque":
+            x1 = (r[1])**0.5
+            x2 = (r[2])**0.5
+            sig1 = S[1]*r[1]**(3.0/2.0)
+            sig2 = S[2]*r[2]**(3.0/2.0)
+            return self._value*(ri[1]**0.5)*(sig2-sig1)/(x2-x1)/r[0]**(1.5)
+
 
     def setboundary(self):
         """Function sets the boundary value."""
